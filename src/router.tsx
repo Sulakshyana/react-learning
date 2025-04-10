@@ -1,7 +1,7 @@
 import './index.css'
 import { Route, Routes } from 'react-router-dom'
-import Home from './Components/Home.tsx'
-import Counter from './Components/count.tsx'
+import Home from './components/Home';
+import Counter from './components/Counter';
 
   const Router: React.FC = () => {
     return(
