@@ -13,6 +13,9 @@ function Home() {
           <li>
             <Link to="/count">Count</Link>
           </li>
+          <li>
+            <Link to="/auto-counter">Auto Counter</Link>
+          </li>
         </ul>
       </nav>
         </>
