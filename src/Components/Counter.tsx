@@ -1,20 +1,28 @@
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
+const MinCount = -10;
+const MaxCount = 10;
+
 function Counter() {
   const [count, setCount] = useState(0);
-  const MinCount = -10;
-  const MaxCount = 10;
-  function addcount() {
+
+  const addcount = () => {
+    console.log("reached addcount", "prevCount");
+
     setCount((prevCount) => {
+      console.log("reached setCount", prevCount);
+
       if (prevCount < MaxCount) {
         return prevCount + 1;
       } else {
+        console.log("reached ");
         window.alert("you cannot add more than 10 todos");
         return prevCount;
       }
     });
-  }
+  };
+  
   function subtractcount() {
     setCount((prevCount) => {
       if (prevCount > MinCount) {

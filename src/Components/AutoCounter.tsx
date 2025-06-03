@@ -6,31 +6,32 @@ function AutoCounter() {
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    let interval: number | null = null;
-    if (isRunning && count < MaxCount)
+    let interval: number | null;
+    if (isRunning)
       interval = setInterval(() => {
         setCount((prevCount) => {
           if (prevCount < MaxCount) {
             return prevCount + 1;
           } else {
-            return prevCount;
+            return 0;
           }
         });
       }, 1000);
-    if (count >= MaxCount && isRunning) {
-      setIsRunning(false);
-    }
+    else interval = null;
+
+    // let interval: number | null = isRunning
+    //   ? setInterval(() => setCount((p) => (p < MaxCount ? ++p : 0)), 1000)
+    //   : null;
+
     return () => {
       if (interval !== null) clearInterval(interval);
     };
-  }, [isRunning, count]);
+  }, [isRunning]);
 
   const toggleCounter = () => {
-    if (!isRunning && count >= MaxCount) {
-      setCount(0);
-    }
     setIsRunning((prev) => !prev);
   };
+
   return (
     <div>
       <h2>Automatic Counter</h2>
