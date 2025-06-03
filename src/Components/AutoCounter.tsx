@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
+const MaxCount = 10;
 function AutoCounter() {
   const [count, setCount] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const MaxCount = 10;
 
   useEffect(() => {
     let interval: number | null = null;
