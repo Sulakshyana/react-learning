@@ -1,27 +1,35 @@
 import { useState } from "react";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
+const MinCount = -10;
+const MaxCount = 10;
+
 function Counter() {
-  const [count, setcount] = useState(0);
-  const MinCount = -10;
-  const MaxCount = 10;
-  function addcount() {
-    setcount((prevcount) => {
-      if (prevcount < MaxCount) {
-        return prevcount + 1;
+  const [count, setCount] = useState(0);
+
+  const addcount = () => {
+    console.log("reached addcount", "prevCount");
+
+    setCount((prevCount) => {
+      console.log("reached setCount", prevCount);
+
+      if (prevCount < MaxCount) {
+        return prevCount + 1;
       } else {
+        console.log("reached ");
         window.alert("you cannot add more than 10 todos");
-        return prevcount;
+        return prevCount;
       }
     });
-  }
+  };
+
   function subtractcount() {
-    setcount((prevcount) => {
-      if (prevcount > MinCount) {
-        return prevcount - 1;
+    setCount((prevCount) => {
+      if (prevCount > MinCount) {
+        return prevCount - 1;
       } else {
         window.alert("Sorry! You cannot go below -10 todos");
-        return prevcount;
+        return prevCount;
       }
     });
   }
