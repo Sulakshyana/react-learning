@@ -6,7 +6,7 @@ function AutoCounter() {
   const [isRunning, setIsRunning] = useState(false);
 
   useEffect(() => {
-    let interval: number | null;
+    let interval: NodeJS.Timeout | null;
     if (isRunning)
       interval = setInterval(() => {
         setCount((prevCount) => {

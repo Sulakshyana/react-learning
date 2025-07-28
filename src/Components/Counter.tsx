@@ -22,7 +22,7 @@ function Counter() {
       }
     });
   };
-  
+
   function subtractcount() {
     setCount((prevCount) => {
       if (prevCount > MinCount) {
