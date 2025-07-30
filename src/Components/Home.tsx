@@ -18,6 +18,9 @@ function Home() {
           <li>
             <Link to="/auto-counter">Auto Counter</Link>
           </li>
+          <li>
+            <Link to="/input-field">Input Field</Link>
+          </li>
         </ul>
       </nav>
     </>
