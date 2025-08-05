@@ -21,6 +21,9 @@ function Home() {
           <li>
             <Link to="/input-field">Input Field</Link>
           </li>
+          <li>
+            <Link to="/input-field-2">Input Field refactor</Link>
+          </li>
         </ul>
       </nav>
     </>

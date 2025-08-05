@@ -1,177 +1,240 @@
 import { useState } from "react";
-import "./style.css";
-function InputField() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [number, setNumber] = useState("");
-  const [nameError, setNameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [numberError, setNumberError] = useState("");
-  const [Submitted, setSubmitted] = useState(false);
+import "./InputField.css";
 
-  const [gender, setGender] = useState("");
-  const [language, setLanguage] = useState<string[]>([]);
-  const [continent, setContinent] = useState("");
+type TFormData = {
+  name: string;
+  email: string;
+  number: string;
+  gender: string;
+  language: string[];
+  continent: string;
+};
 
-  const genders = ["Male", "Female"];
-  const languages = ["Hindi", "English", "Nepali"];
-  const continents = [
-    "Asia",
-    "Europe",
-    "Australia",
-    "Africa",
-    "North America",
-    "Antarctica",
-    "South America",
-  ];
+type TErrors = {
+  nameError: string;
+  emailError: string;
+  numberError: string;
+};
 
-  const nameregx = /^[a-zA-Z]{1,10}$/;
-  const emailregx = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const numberregx = /^(98|97|96)\d{8}$/;
-  function handleName(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target.value;
-    if (!nameregx.test(input))
-      setNameError("name cannot ne more than 10 characters");
-    else {
-      setNameError("");
-    }
-    if (input.length <= 10) setName(input);
-  }
+const patterns = {
+  // name: /^[a-zA-Z]{1,10}$/,
+  name: /^[a-zA-Z]{3,10}$/,
+  number: /^(98|97|96)\d{8}$/,
+  email: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+};
 
-  function handleEmail(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target.value;
-    setEmail(input);
-    if (!emailregx.test(input)) setEmailError("Email address invalid");
-    else setEmailError("");
-  }
-  function handleNumber(e: React.ChangeEvent<HTMLInputElement>) {
-    const input = e.target.value;
-    if (!numberregx.test(input)) setNumberError("Number is invalid");
-    else setNumberError("");
-    setNumber(input);
-  }
+const genders = ["Male", "Female"];
+const languages = ["Hindi", "English", "Nepali"];
+const continents = [
+  "Asia",
+  "Europe",
+  "Australia",
+  "Africa",
+  "North America",
+  "Antarctica",
+  "South America",
+];
 
-  const handleGender = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setGender(e.target.value);
-  };
+function InputFieldRefactor() {
+  const [formData, setFormData] = useState<TFormData>({
+    name: "",
+    email: "",
+    number: "",
+    gender: "",
+    language: [],
+    continent: "",
+  });
 
-  const handleContinent = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setContinent(e.target.value);
-  };
+  const [errors, setErrors] = useState<TErrors>({
+    nameError: "",
+    emailError: "",
+    numberError: "",
+  });
 
-  const handleLanguage = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { value, checked } = e.target;
-    console.log({ value, checked });
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-    if (checked) {
-      setLanguage((prev) => [...prev, value]);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value, checked } = e.target;
+
+    // if (name === "name" && value.length > 10) {
+    //   setErrors((prev) => ({
+    //     ...prev,
+    //     nameError: "Name cannot be more than 10 characters",
+    //   }));
+    //   return;
+    // }
+
+    if (name === "language") {
+      setFormData((prev) => ({
+        ...prev,
+        language: checked
+          ? [...prev.language, value]
+          : prev.language.filter((lang) => lang !== value),
+      }));
     } else {
-      setLanguage((prev) => prev.filter((lang) => lang !== value));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
+
+    // Validation
+    if (patterns[name as keyof typeof patterns]) {
+      const regex = patterns[name as keyof typeof patterns];
+      setErrors((prev) => ({
+        ...prev,
+        [`${name}Error`]: regex.test(value) ? "" : `Invalid ${name}`,
+      }));
+    }
+    // if (name === "name" && value.length < 4) {
+    //   setErrors((prev) => {
+    //     return { ...prev, nameError: "Name must be more than 3 characters" };
+    //   });
+    // }
   };
+
+  const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const { name, value } = e.target; //e.target.name & e,target.value (destructuring)
+    console.log({ name, value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsSubmitted(true);
   };
 
-  console.log({ language });
+  const handleEdit = () => {
+    setIsSubmitted(false);
+  };
+
   return (
     <>
       <form onSubmit={handleSubmit} className="form">
-        <div className="form-input-wrapper">
+        <div className="form-group">
           <input
             required
-            value={name}
+            name="name"
+            value={formData.name}
             placeholder="Name"
-            onChange={handleName}
-            className="form-input-wrapper-input form-input-wrapper-input-name"
-          ></input>
-          {nameError && <p>{nameError}</p>}
+            onChange={handleChange}
+            disabled={isSubmitted}
+            className="form-input"
+          />
+          {errors.nameError && <p className="error">{errors.nameError}</p>}
         </div>
 
-        <div>
+        <div className="form-group">
           <input
             required
+            name="email"
             type="email"
-            value={email}
-            onChange={handleEmail}
+            className="form-input"
+            value={formData.email}
+            onChange={handleChange}
             placeholder="Email"
+            disabled={isSubmitted}
           />
-          {emailError && <p>{emailError}</p>}
+          {errors.emailError && <p className="error">{errors.emailError}</p>}
         </div>
 
-        <div>
-          <input value={number} onChange={handleNumber} placeholder="Number" />
-          {numberError && <p>{numberError}</p>}
+        <div className="form-group">
+          <input
+            name="number"
+            value={formData.number}
+            onChange={handleChange}
+            placeholder="Number"
+            className="form-input"
+            disabled={isSubmitted}
+          />
+          {errors.numberError && <p className="error">{errors.numberError}</p>}
         </div>
-        <div>
-          <p className="form-desc">Gender</p>
-          {genders.map((gender) => (
-            <div key={gender}>
+        <div className="form-group">
+          <p className="form-label">Gender</p>
+          {genders.map((g) => (
+            <label key={g} className="form-inline">
               <input
+                value={g}
                 type="radio"
-                value={gender}
-                id={gender.toLowerCase()}
                 name="gender"
-                onChange={handleGender}
+                id={g.toLowerCase()}
+                checked={formData.gender === g}
+                onChange={handleChange}
+                disabled={isSubmitted}
               />
-              <label htmlFor={gender.toLowerCase()}>{gender}</label>
-            </div>
+              {g}
+            </label>
           ))}
         </div>
 
-        <div>
-          <p className="form-desc">Languages you know</p>
+        <div className="form-group">
+          <p className="form-label">Languages you know</p>
           {languages.map((lang, idx) => (
-            <div key={lang}>
+            <label key={lang + "-" + idx} className="form-inline">
               <input
-                type="checkbox"
-                name="Language"
                 value={lang}
-                onChange={handleLanguage}
-                id={lang.toLowerCase()}
+                type="checkbox"
+                name="language"
+                id={`${lang}-${idx}`}
+                onChange={handleChange}
+                disabled={isSubmitted}
+                checked={formData.language.includes(lang)}
               />
-              <label htmlFor={lang.toLowerCase()}>{lang} </label>
-            </div>
+              {lang}{" "}
+            </label>
           ))}
         </div>
         {/* TODO: remove key ehst does key do on map */}
-        <div>
-          <label className="form-desc" htmlFor="continent">
+        <div className="form-group">
+          <label className="form-label" htmlFor="continent">
             Select your continent
           </label>
           <br />
           <select
             required
-            name="continents"
+            name="continent"
             id="continents"
-            value={continent}
-            onChange={handleContinent}
+            value={formData.continent}
+            disabled={isSubmitted}
+            className="form-input"
+            onChange={handleSelectChange}
           >
             <option value="">-- Select --</option>
-            {continents.map((continent) => (
-              <option key={continent} value={continent}>
-                {continent}
+            {continents.map((cont) => (
+              <option key={cont} value={cont}>
+                {cont}
               </option>
             ))}
           </select>
         </div>
 
-        <button type="submit" id="formsummit" className="form-desc">
+        <button
+          type="submit"
+          id="formSubmit"
+          className="form-button form-submit-btn"
+        >
           Submit
         </button>
-        {Submitted && (
-          <div>
-            {name && <p>Name: {name}</p>}
-            {email && <p>Email: {email}</p>}
-            {number && <p>Number {number}</p>}
-            {gender && <p>Gender: {gender}</p>}
-            {language && <p>Language: {language.join(", ")}</p>}
-            {continent && <p>Continent: {continent}</p>}
+        <button
+          type="button"
+          id="formEdit"
+          className="form-button form-edit-btn"
+          onClick={handleEdit}
+          disabled={!isSubmitted}
+        >
+          Edit
+        </button>
+        {isSubmitted && (
+          <div className="submitted">
+            {formData.name && <p>Name: {formData.name}</p>}
+            {formData.email && <p>Email: {formData.email}</p>}
+            {formData.number && <p>Number {formData.number}</p>}
+            {formData.gender && <p>Gender: {formData.gender}</p>}
+            {formData.language && (
+              <p>Language: {formData.language.join(", ")}</p>
+            )}
+            {formData.continent && <p>Continent: {formData.continent}</p>}
           </div>
         )}
       </form>
     </>
   );
 }
-export default InputField;
+export default InputFieldRefactor;
