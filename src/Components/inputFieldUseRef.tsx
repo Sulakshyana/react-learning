@@ -45,7 +45,7 @@ function InputFieldUseRef() {
     continent: "",
   });
 
-  const [errors, setErrors] = useState<TErrors>({
+  const errorsRef = useRef<TErrors>({
     nameError: "",
     emailError: "",
     numberError: "",
@@ -53,9 +53,8 @@ function InputFieldUseRef() {
 
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState<TFormData | null>(null);
-
   //force re-render
-  // //the state is empty object which never gets read
+  //the state is empty object which never gets read
   const [, forceRerender] = useState({});
   //calls forceRerender function with new empty object so that react re-renders the component thinking the object is changed
   const triggerRerender = () => forceRerender({});
@@ -83,10 +82,16 @@ function InputFieldUseRef() {
     // Validation
     if (patterns[name as keyof typeof patterns]) {
       const regex = patterns[name as keyof typeof patterns];
-      setErrors((prev) => ({
-        ...prev,
-        [`${name}Error`]: regex.test(value) ? "" : `Invalid ${name}`,
-      }));
+      // {     nameError: "",     emailError: "",     numberError: ""   }
+      errorsRef.current[(name + "Error") as keyof TErrors] = regex.test(value)
+        ? ""
+        : "Invalid " + name + " Error";
+
+      // setErrors((prev) => ({
+      //   // {     nameError: "",     emailError: "",     numberError: ""   }
+      //   ...prev,
+      //   [`${name}Error`]: regex.test(value) ? "" : `Invalid ${name}`,
+      // }));
     }
     // if (name === "name" && value.length < 4) {
     //   setErrors((prev) => {
@@ -97,8 +102,7 @@ function InputFieldUseRef() {
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const { name, value } = e.target; //e.target.name & e,target.value (destructuring)
-    console.log({ name, value });
+    const { name, value } = e.target; //e.target.name & e.target.value (destructuring)
     formDataRef.current[name as keyof TFormData] = value as any;
     triggerRerender();
   };
@@ -114,6 +118,7 @@ function InputFieldUseRef() {
     setSubmittedData(null);
   };
 
+  const { nameError, emailError, numberError } = errorsRef.current;
   return (
     <>
       <form onSubmit={handleSubmit} className="form">
@@ -127,7 +132,7 @@ function InputFieldUseRef() {
             disabled={isSubmitted}
             className="form-input"
           />
-          {errors.nameError && <p className="error">{errors.nameError}</p>}
+          {nameError && <p className="error">{nameError}</p>}
         </div>
 
         <div className="form-group">
@@ -141,7 +146,7 @@ function InputFieldUseRef() {
             placeholder="Email"
             disabled={isSubmitted}
           />
-          {errors.emailError && <p className="error">{errors.emailError}</p>}
+          {emailError && <p className="error">{emailError}</p>}
         </div>
 
         <div className="form-group">
@@ -153,7 +158,7 @@ function InputFieldUseRef() {
             className="form-input"
             disabled={isSubmitted}
           />
-          {errors.numberError && <p className="error">{errors.numberError}</p>}
+          {numberError && <p className="error">{numberError}</p>}
         </div>
         <div className="form-group">
           <p className="form-label">Gender</p>
