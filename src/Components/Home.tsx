@@ -24,6 +24,9 @@ function Home() {
           <li>
             <Link to="/input-field-2">Input Field refactor</Link>
           </li>
+          <li>
+            <Link to="/input-field-2">Input Field using UseRef</Link>
+          </li>
         </ul>
       </nav>
     </>

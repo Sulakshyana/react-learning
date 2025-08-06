@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import "./InputField.css";
 
 type TFormData = {
@@ -16,7 +16,6 @@ type TErrors = {
   numberError: string;
 };
 
-type TPatternKey = keyof typeof patterns;
 const patterns = {
   // name: /^[a-zA-Z]{1,10}$/,
   name: /^[a-zA-Z]{3,10}$/,
@@ -36,8 +35,8 @@ const continents = [
   "South America",
 ];
 
-function InputField() {
-  const [formData, setFormData] = useState<TFormData>({
+function InputFieldUseRef() {
+  const formDataRef = useRef<TFormData>({
     name: "",
     email: "",
     number: "",
@@ -53,12 +52,15 @@ function InputField() {
   });
 
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-  const [submitting, setSubmitting] = useState(false);
-  const delay = (t: number): Promise<void> =>
-    new Promise((resolve) => setTimeout(resolve, t));
+  const [submittedData, setSubmittedData] = useState<TFormData | null>(null);
+
+  //force re-render
+  // //the state is empty object which never gets read
+  const [, forceRerender] = useState({});
+  //calls forceRerender function with new empty object so that react re-renders the component thinking the object is changed
+  const triggerRerender = () => forceRerender({});
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (isSubmitted) return;
     const { name, value, checked } = e.target;
 
     // if (name === "name" && value.length > 10) {
@@ -70,19 +72,17 @@ function InputField() {
     // }
 
     if (name === "language") {
-      setFormData((prev) => ({
-        ...prev,
-        language: checked
-          ? [...prev.language, value]
-          : prev.language.filter((lang) => lang !== value),
-      }));
+      const currentLanguages = formDataRef.current.language;
+      formDataRef.current.language = checked
+        ? [...currentLanguages, value]
+        : currentLanguages.filter((lang) => lang !== value);
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      formDataRef.current[name as keyof TFormData] = value as any;
     }
 
     // Validation
-    if (patterns[name as TPatternKey]) {
-      const regex = patterns[name as TPatternKey];
+    if (patterns[name as keyof typeof patterns]) {
+      const regex = patterns[name as keyof typeof patterns];
       setErrors((prev) => ({
         ...prev,
         [`${name}Error`]: regex.test(value) ? "" : `Invalid ${name}`,
@@ -93,24 +93,25 @@ function InputField() {
     //     return { ...prev, nameError: "Name must be more than 3 characters" };
     //   });
     // }
+    triggerRerender();
   };
 
   const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target; //e.target.name & e,target.value (destructuring)
     console.log({ name, value });
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    formDataRef.current[name as keyof TFormData] = value as any;
+    triggerRerender();
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitting(true);
-    await delay(2000);
-    setSubmitting(false);
     setIsSubmitted(true);
+    setSubmittedData({ ...formDataRef.current });
   };
 
   const handleEdit = () => {
     setIsSubmitted(false);
+    setSubmittedData(null);
   };
 
   return (
@@ -120,10 +121,10 @@ function InputField() {
           <input
             required
             name="name"
-            value={formData.name}
+            value={formDataRef.current.name}
             placeholder="Name"
             onChange={handleChange}
-            readOnly={isSubmitted}
+            disabled={isSubmitted}
             className="form-input"
           />
           {errors.nameError && <p className="error">{errors.nameError}</p>}
@@ -135,10 +136,10 @@ function InputField() {
             name="email"
             type="email"
             className="form-input"
-            value={formData.email}
+            value={formDataRef.current.email}
             onChange={handleChange}
             placeholder="Email"
-            readOnly={isSubmitted}
+            disabled={isSubmitted}
           />
           {errors.emailError && <p className="error">{errors.emailError}</p>}
         </div>
@@ -146,11 +147,11 @@ function InputField() {
         <div className="form-group">
           <input
             name="number"
-            value={formData.number}
+            value={formDataRef.current.number}
             onChange={handleChange}
             placeholder="Number"
             className="form-input"
-            readOnly={isSubmitted}
+            disabled={isSubmitted}
           />
           {errors.numberError && <p className="error">{errors.numberError}</p>}
         </div>
@@ -163,9 +164,9 @@ function InputField() {
                 type="radio"
                 name="gender"
                 id={g.toLowerCase()}
-                checked={formData.gender === g}
+                checked={formDataRef.current.gender === g}
                 onChange={handleChange}
-                readOnly={isSubmitted}
+                disabled={isSubmitted}
               />
               {g}
             </label>
@@ -182,14 +183,13 @@ function InputField() {
                 name="language"
                 id={`${lang}-${idx}`}
                 onChange={handleChange}
-                readOnly={isSubmitted}
-                checked={formData.language.includes(lang)}
+                disabled={isSubmitted}
+                checked={formDataRef.current.language.includes(lang)}
               />
               {lang}{" "}
             </label>
           ))}
         </div>
-        {/* TODO: remove key ehst does key do on map */}
         <div className="form-group">
           <label className="form-label" htmlFor="continent">
             Select your continent
@@ -199,7 +199,7 @@ function InputField() {
             required
             name="continent"
             id="continents"
-            value={formData.continent}
+            value={formDataRef.current.continent}
             disabled={isSubmitted}
             className="form-input"
             onChange={handleSelectChange}
@@ -218,7 +218,7 @@ function InputField() {
           id="formSubmit"
           className="form-button form-submit-btn"
         >
-          {submitting ? "submitting..." : "submit"}
+          Submit
         </button>
         <button
           type="button"
@@ -229,20 +229,22 @@ function InputField() {
         >
           Edit
         </button>
-        {isSubmitted && (
+        {isSubmitted && submittedData && (
           <div className="submitted">
-            {formData.name && <p>Name: {formData.name}</p>}
-            {formData.email && <p>Email: {formData.email}</p>}
-            {formData.number && <p>Number {formData.number}</p>}
-            {formData.gender && <p>Gender: {formData.gender}</p>}
-            {formData.language && (
-              <p>Language: {formData.language.join(", ")}</p>
+            {submittedData.name && <p>Name: {submittedData.name}</p>}
+            {submittedData.email && <p>Email: {submittedData.email}</p>}
+            {submittedData.number && <p>Number {submittedData.number}</p>}
+            {submittedData.gender && <p>Gender: {submittedData.gender}</p>}
+            {submittedData.language && (
+              <p>Language: {submittedData.language.join(", ")}</p>
             )}
-            {formData.continent && <p>Continent: {formData.continent}</p>}
+            {submittedData.continent && (
+              <p>Continent: {submittedData.continent}</p>
+            )}
           </div>
         )}
       </form>
     </>
   );
 }
-export default InputField;
+export default InputFieldUseRef;
