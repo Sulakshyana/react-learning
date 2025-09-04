@@ -33,6 +33,9 @@ function Home() {
           <li>
             <Link to="/useReducer-todo-list">useReducer Todo List</Link>
           </li>
+          <li>
+            <Link to="/props-drilling">Carts</Link>
+          </li>
         </ul>
       </nav>
     </>

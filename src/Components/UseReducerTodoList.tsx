@@ -18,12 +18,6 @@ type TAction =
   | { type: "resetCurrentTodo" }
   | { type: "setTodos"; payload: TTodo[] };
 
-const init: TState = {
-  todos: [],
-  currentTodo: { id: null, text: "" },
-  filter: "all",
-};
-
 const reducer = (s: TState, a: TAction): TState => {
   switch (a.type) {
     case "add":

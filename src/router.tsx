@@ -8,6 +8,7 @@ import InputFieldUseRef from "./components/inputFieldUseRef";
 import TodoItem from "./components/TodoItem";
 import UseReducer from "./components/UseReducer";
 import UseReducerATodoList from "./components/UseReducerTodoList";
+import Cart from "./components/propsDrilling/cart";
 
 const Router: React.FC = () => {
   return (
@@ -20,6 +21,7 @@ const Router: React.FC = () => {
       <Route path="/todo-list" element={<TodoItem />} />
       <Route path="/use-reducer" element={<UseReducer />} />
       <Route path="/useReducer-todo-list" element={<UseReducerATodoList />} />
+      <Route path="/props-drilling" element={<Cart />} />
     </Routes>
   );
 };
